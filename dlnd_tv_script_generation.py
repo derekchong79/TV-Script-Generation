@@ -266,7 +266,7 @@ def batch_data(words, sequence_length, batch_size):
     #print("\n\nNumber of Words after batching = {}".format(len(words)))
     
     features, targets = [],[]
-    for idx in range (0, len(words), batch_size):
+    for idx in range (0, len(words)-sequence_length, batch_size):
         #print('\nidx number = {}'.format(idx))
         #print('\nBatch_size = {}'.format(batch_size))
         features.append(words[idx:idx + sequence_length])
@@ -358,7 +358,7 @@ print(sample_y)
 # out = output[:, -1]
 # ```
 
-# In[14]:
+# In[12]:
 
 
 import torch.nn as nn
@@ -472,7 +472,7 @@ tests.test_rnn(RNN, train_on_gpu)
 # 
 # **If a GPU is available, you should move your data to that GPU device, here.**
 
-# In[21]:
+# In[13]:
 
 
 def forward_back_prop(rnn, optimizer, criterion, inp, target, hidden):
@@ -534,7 +534,7 @@ tests.test_forward_back_prop(RNN, forward_back_prop, train_on_gpu)
 # 
 # The training loop is implemented for you in the `train_decoder` function. This function will train the network over all the batches for the number of epochs given. The model progress will be shown every number of batches. This number is set with the `show_every_n_batches` parameter. You'll set this parameter along with other parameters in the next section.
 
-# In[22]:
+# In[14]:
 
 
 """
@@ -590,7 +590,7 @@ def train_rnn(rnn, batch_size, optimizer, criterion, n_epochs, show_every_n_batc
 # 
 # If the network isn't getting the desired results, tweak these parameters and/or the layers in the `RNN` class.
 
-# In[23]:
+# In[15]:
 
 
 # Data params
@@ -603,7 +603,7 @@ batch_size = 128
 train_loader = batch_data(int_text, sequence_length, batch_size)
 
 
-# In[24]:
+# In[16]:
 
 
 # Training parameters
@@ -634,7 +634,7 @@ show_every_n_batches = 500
 # 
 # You should also experiment with different sequence lengths, which determine the size of the long range dependencies that a model can learn.
 
-# In[ ]:
+# In[17]:
 
 
 """
