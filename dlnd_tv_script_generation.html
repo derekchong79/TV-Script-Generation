@@ -14708,24 +14708,6 @@ george: yes, it was purple, i liked it, i dont actually recall considering the b
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>No GPU found. Please use a GPU to train your neural network.
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
@@ -14966,7 +14948,7 @@ out = output[:, -1]</code></pre>
         
         <span class="n">batch_size</span> <span class="o">=</span> <span class="n">nn_input</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> batch_size value = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">batch_size</span><span class="p">))</span>
+        <span class="c1">#print(&#39;\n batch_size value = {}&#39;.format(batch_size))</span>
         
         <span class="c1"># Embeddings &amp; LSTM out</span>
         <span class="n">embeds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding</span><span class="p">(</span><span class="n">nn_input</span><span class="p">)</span>
@@ -14978,7 +14960,7 @@ out = output[:, -1]</code></pre>
         <span class="c1"># dropout &amp; fully-connected layer</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">lstm_out</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-        
+                
         <span class="c1"># sigmoid</span>
         <span class="n">sigmoid_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
         
@@ -14986,10 +14968,10 @@ out = output[:, -1]</code></pre>
         <span class="n">output</span> <span class="o">=</span> <span class="n">sigmoid_out</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">)</span>
             
         <span class="c1"># get last batch</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">output</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">sigmoid_out</span> <span class="o">=</span> <span class="n">output</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="c1"># return one batch of output word scores and the hidden state</span>
-        <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">hidden</span>
+        <span class="k">return</span> <span class="n">sigmoid_out</span><span class="p">,</span> <span class="n">hidden</span>
     
     
     <span class="k">def</span> <span class="nf">init_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
@@ -15033,9 +15015,7 @@ out = output[:, -1]</code></pre>
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>
- batch_size value = 50
-Tests Passed
+<pre>Tests Passed
 </pre>
 </div>
 </div>
@@ -15093,8 +15073,8 @@ Tests Passed
     <span class="c1"># get the output from the model</span>
     <span class="n">output</span><span class="p">,</span> <span class="n">hidden</span> <span class="o">=</span> <span class="n">rnn</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">hidden</span><span class="p">)</span>
     
-    <span class="c1"># calculate the loss and perform backprop</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">target</span><span class="p">)</span>
+    <span class="c1"># calculate the loss and perform backpropagation</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
     <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
     
     <span class="c1"># `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.</span>
@@ -15239,27 +15219,47 @@ Tests Passed
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Training parameters</span>
 <span class="c1"># Number of Epochs</span>
-<span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="c1"># Learning Rate</span>
-<span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">0.001</span>
 
 <span class="c1"># Model parameters</span>
 <span class="c1"># Vocab size</span>
-<span class="n">vocab_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vocab_to_int</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">vocab_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vocab_to_int</span><span class="p">)</span>
 <span class="c1"># Output size</span>
-<span class="n">output_size</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">output_size</span> <span class="o">=</span> <span class="n">vocab_size</span>
 <span class="c1"># Embedding Dimension</span>
-<span class="n">embedding_dim</span> <span class="o">=</span> <span class="mi">400</span>
+<span class="n">embedding_dim</span> <span class="o">=</span> <span class="mi">200</span>
 <span class="c1"># Hidden Dimension</span>
-<span class="n">hidden_dim</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">hidden_dim</span> <span class="o">=</span> <span class="mi">256</span>
 <span class="c1"># Number of RNN Layers</span>
 <span class="n">n_layers</span> <span class="o">=</span> <span class="mi">2</span>
 
 <span class="c1"># Show stats for every n number of batches</span>
 <span class="n">show_every_n_batches</span> <span class="o">=</span> <span class="mi">500</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vocab_to_int</span><span class="p">))</span>
 </pre></div>
 
     </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>21388
+</pre>
+</div>
+</div>
+
 </div>
 </div>
 
@@ -15315,9 +15315,8 @@ Tests Passed
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Training for 1 epoch(s)...
-
- batch_size value = 128
+<pre>Training for 10 epoch(s)...
+Model Trained and Saved
 </pre>
 </div>
 </div>
@@ -15327,60 +15326,10 @@ Tests Passed
     <div class="prompt"></div>
 
 
-<div class="output_subarea output_text output_error">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">RuntimeError</span>                              Traceback (most recent call last)
-<span class="ansi-green-fg">&lt;ipython-input-17-fc6fcf49d39c&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-fg">()</span>
-<span class="ansi-green-intense-fg ansi-bold">     13</span> 
-<span class="ansi-green-intense-fg ansi-bold">     14</span> <span class="ansi-red-fg"># training the model</span>
-<span class="ansi-green-fg">---&gt; 15</span><span class="ansi-red-fg"> </span>trained_rnn <span class="ansi-blue-fg">=</span> train_rnn<span class="ansi-blue-fg">(</span>rnn<span class="ansi-blue-fg">,</span> batch_size<span class="ansi-blue-fg">,</span> optimizer<span class="ansi-blue-fg">,</span> criterion<span class="ansi-blue-fg">,</span> num_epochs<span class="ansi-blue-fg">,</span> show_every_n_batches<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     16</span> 
-<span class="ansi-green-intense-fg ansi-bold">     17</span> <span class="ansi-red-fg"># saving the trained model</span>
-
-<span class="ansi-green-fg">&lt;ipython-input-14-54bd9dc2f859&gt;</span> in <span class="ansi-cyan-fg">train_rnn</span><span class="ansi-blue-fg">(rnn, batch_size, optimizer, criterion, n_epochs, show_every_n_batches)</span>
-<span class="ansi-green-intense-fg ansi-bold">     22</span> 
-<span class="ansi-green-intense-fg ansi-bold">     23</span>             <span class="ansi-red-fg"># forward, back prop</span>
-<span class="ansi-green-fg">---&gt; 24</span><span class="ansi-red-fg">             </span>loss<span class="ansi-blue-fg">,</span> hidden <span class="ansi-blue-fg">=</span> forward_back_prop<span class="ansi-blue-fg">(</span>rnn<span class="ansi-blue-fg">,</span> optimizer<span class="ansi-blue-fg">,</span> criterion<span class="ansi-blue-fg">,</span> inputs<span class="ansi-blue-fg">,</span> labels<span class="ansi-blue-fg">,</span> hidden<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     25</span>             <span class="ansi-red-fg"># record loss</span>
-<span class="ansi-green-intense-fg ansi-bold">     26</span>             batch_losses<span class="ansi-blue-fg">.</span>append<span class="ansi-blue-fg">(</span>loss<span class="ansi-blue-fg">)</span>
-
-<span class="ansi-green-fg">&lt;ipython-input-13-a4fdb3f23329&gt;</span> in <span class="ansi-cyan-fg">forward_back_prop</span><span class="ansi-blue-fg">(rnn, optimizer, criterion, inp, target, hidden)</span>
-<span class="ansi-green-intense-fg ansi-bold">     32</span> 
-<span class="ansi-green-intense-fg ansi-bold">     33</span>     <span class="ansi-red-fg"># calculate the loss and perform backprop</span>
-<span class="ansi-green-fg">---&gt; 34</span><span class="ansi-red-fg">     </span>loss <span class="ansi-blue-fg">=</span> criterion<span class="ansi-blue-fg">(</span>output<span class="ansi-blue-fg">.</span>squeeze<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">,</span> target<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     35</span>     loss<span class="ansi-blue-fg">.</span>backward<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     36</span> 
-
-<span class="ansi-green-fg">/opt/conda/lib/python3.6/site-packages/torch/nn/modules/module.py</span> in <span class="ansi-cyan-fg">__call__</span><span class="ansi-blue-fg">(self, *input, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">    489</span>             result <span class="ansi-blue-fg">=</span> self<span class="ansi-blue-fg">.</span>_slow_forward<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">*</span>input<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    490</span>         <span class="ansi-green-fg">else</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-fg">--&gt; 491</span><span class="ansi-red-fg">             </span>result <span class="ansi-blue-fg">=</span> self<span class="ansi-blue-fg">.</span>forward<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">*</span>input<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    492</span>         <span class="ansi-green-fg">for</span> hook <span class="ansi-green-fg">in</span> self<span class="ansi-blue-fg">.</span>_forward_hooks<span class="ansi-blue-fg">.</span>values<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-intense-fg ansi-bold">    493</span>             hook_result <span class="ansi-blue-fg">=</span> hook<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> input<span class="ansi-blue-fg">,</span> result<span class="ansi-blue-fg">)</span>
-
-<span class="ansi-green-fg">/opt/conda/lib/python3.6/site-packages/torch/nn/modules/loss.py</span> in <span class="ansi-cyan-fg">forward</span><span class="ansi-blue-fg">(self, input, target)</span>
-<span class="ansi-green-intense-fg ansi-bold">    757</span>         _assert_no_grad<span class="ansi-blue-fg">(</span>target<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    758</span>         return F.cross_entropy(input, target, self.weight, self.size_average,
-<span class="ansi-green-fg">--&gt; 759</span><span class="ansi-red-fg">                                self.ignore_index, self.reduce)
-</span><span class="ansi-green-intense-fg ansi-bold">    760</span> 
-<span class="ansi-green-intense-fg ansi-bold">    761</span> 
-
-<span class="ansi-green-fg">/opt/conda/lib/python3.6/site-packages/torch/nn/functional.py</span> in <span class="ansi-cyan-fg">cross_entropy</span><span class="ansi-blue-fg">(input, target, weight, size_average, ignore_index, reduce)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1440</span>         <span class="ansi-blue-fg">&gt;&gt;</span><span class="ansi-blue-fg">&gt;</span> loss<span class="ansi-blue-fg">.</span>backward<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1441</span>     &#34;&#34;&#34;
-<span class="ansi-green-fg">-&gt; 1442</span><span class="ansi-red-fg">     </span><span class="ansi-green-fg">return</span> nll_loss<span class="ansi-blue-fg">(</span>log_softmax<span class="ansi-blue-fg">(</span>input<span class="ansi-blue-fg">,</span> <span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">,</span> target<span class="ansi-blue-fg">,</span> weight<span class="ansi-blue-fg">,</span> size_average<span class="ansi-blue-fg">,</span> ignore_index<span class="ansi-blue-fg">,</span> reduce<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1443</span> 
-<span class="ansi-green-intense-fg ansi-bold">   1444</span> 
-
-<span class="ansi-green-fg">/opt/conda/lib/python3.6/site-packages/torch/nn/functional.py</span> in <span class="ansi-cyan-fg">log_softmax</span><span class="ansi-blue-fg">(input, dim, _stacklevel)</span>
-<span class="ansi-green-intense-fg ansi-bold">    942</span>     <span class="ansi-green-fg">if</span> dim <span class="ansi-green-fg">is</span> <span class="ansi-green-fg">None</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-intense-fg ansi-bold">    943</span>         dim <span class="ansi-blue-fg">=</span> _get_softmax_dim<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;log_softmax&#39;</span><span class="ansi-blue-fg">,</span> input<span class="ansi-blue-fg">.</span>dim<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">,</span> _stacklevel<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-fg">--&gt; 944</span><span class="ansi-red-fg">     </span><span class="ansi-green-fg">return</span> torch<span class="ansi-blue-fg">.</span>_C<span class="ansi-blue-fg">.</span>_nn<span class="ansi-blue-fg">.</span>log_softmax<span class="ansi-blue-fg">(</span>input<span class="ansi-blue-fg">,</span> dim<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    945</span> 
-<span class="ansi-green-intense-fg ansi-bold">    946</span> 
-
-<span class="ansi-red-fg">RuntimeError</span>: dimension out of range (expected to be in range of [-1, 0], but got 1)</pre>
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>/opt/conda/lib/python3.6/site-packages/torch/serialization.py:193: UserWarning: Couldn&#39;t retrieve source code for container of type RNN. It won&#39;t be checked for correctness upon loading.
+  &#34;type &#34; + obj.__name__ + &#34;. It won&#39;t be checked &#34;
+</pre>
 </div>
 </div>
 
@@ -15415,7 +15364,7 @@ Tests Passed
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
@@ -15445,7 +15394,7 @@ Tests Passed
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
@@ -15540,7 +15489,7 @@ Tests Passed
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># run the cell multiple times to get different results!</span>
@@ -15559,6 +15508,121 @@ Tests Passed
 </div>
 </div>
 
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>/opt/conda/lib/python3.6/site-packages/ipykernel_launcher.py:52: UserWarning: RNN module weights are not part of single contiguous chunk of memory. This means they need to be compacted at every call, possibly greatly increasing memory usage. To compact weights again call flatten_parameters().
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>jerry:.
+.
+, a.
+jerry: jerry:.,.
+
+.,
+,..., jerry:
+jerry:
+. jerry: jerry: a. jerry: jerry:
+a a
+... jerry:,.. jerry:. a, jerry:.
+..,
+a
+
+
+.,
+
+jerry: jerry:,., a jerry: jerry:
+
+,
+
+.
+.
+
+jerry:
+a,. jerry: jerry:.
+..
+jerry: jerry:,,. a jerry:..,
+
+
+a jerry:.,,.,,
+
+a,. jerry: a
+jerry:
+a jerry:.,,
+jerry:,.,,
+, jerry: jerry: a. a a. a
+,.. jerry: jerry: jerry: a..
+a,
+, a
+a
+. jerry: jerry:
+
+jerry:.. a jerry: jerry: jerry: jerry:., a, a jerry:
+, a., a,
+
+
+jerry:
+a, a.
+a jerry:., a,, jerry:,.
+
+jerry:
+jerry: jerry:
+jerry:
+, jerry:.. a jerry: a
+
+. jerry:
+
+jerry:, jerry:.,
+
+a a. jerry: a a. a a
+jerry: jerry:
+jerry:.
+
+
+,.
+,
+a
+jerry: a.
+
+, a a.
+
+jerry:, jerry:
+
+a jerry: jerry:,, jerry:., jerry:., a jerry: jerry:
+a a jerry:.. jerry:,.,
+, jerry:,. jerry:.
+.. a a,, a.,
+.. a jerry: jerry: a jerry: jerry:
+jerry: a a, a, jerry:.. jerry:., a, a, jerry: jerry:,. jerry:, a jerry:, jerry: jerry: a a..,. jerry: jerry:
+
+a a a., a. jerry: jerry: a jerry:
+jerry:... a, jerry:., jerry:
+
+a
+,. a
+jerry:
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
@@ -15570,7 +15634,7 @@ Tests Passed
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># save script to a text file</span>
