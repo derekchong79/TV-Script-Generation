@@ -266,7 +266,8 @@ def batch_data(words, sequence_length, batch_size):
     #print("\n\nNumber of Words after batching = {}".format(len(words)))
     
     features, targets = [],[]
-    for idx in range (0, len(words)-sequence_length, batch_size):
+    #for idx in range (0, len(words)-sequence_length, batch_size):
+    for idx in range (0, len(words)-sequence_length):
         #print('\nidx number = {}'.format(idx))
         #print('\nBatch_size = {}'.format(batch_size))
         features.append(words[idx:idx + sequence_length])
@@ -385,12 +386,12 @@ class RNN(nn.Module):
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, hidden_dim, n_layers, dropout = dropout, batch_first = True)
         
-        # dropout layer
-        self.dropout = nn.Dropout(0.5)
+        # dropout layer - removed. already found in the LSTM layer
+        #self.dropout = nn.Dropout(0.5)
         
-        # linear and sigmoid layers
+        # linear and sigmoid layers - no need sigmoid as the logits are returned unaltered
         self.fc = nn.Linear(hidden_dim, output_size)
-        self.sigmoid = nn.Sigmoid()
+        #self.sigmoid = nn.Sigmoid()
         
         # set class variables
         
@@ -417,21 +418,22 @@ class RNN(nn.Module):
         # Stack LSTM outputs
         lstm_out = lstm_out.contiguous().view(-1, self.hidden_dim)
         
-        # dropout & fully-connected layer
-        out = self.dropout(lstm_out)
-        out = self.fc(out)
+        # dropout & fully-connected layer - dropout removed. LSTM layer has dropout
+        #out = self.dropout(lstm_out)
+        out = self.fc(lstm_out)
                 
-        # sigmoid
-        sigmoid_out = self.sigmoid(out)
+        # sigmoid - not required as we are looking to return unaltered logits
+        #sigmoid_out = self.sigmoid(out)
         
         # reshape into (batch_size, seq_length, output_size)
-        output = sigmoid_out.view(batch_size, -1, self.output_size)
+        #output = sigmoid_out.view(batch_size, -1, self.output_size)
+        output = out.view(batch_size, -1, self.output_size)
             
         # get last batch
-        sigmoid_out = output[:, -1]
+        output = output[:, -1]
 
         # return one batch of output word scores and the hidden state
-        return sigmoid_out, hidden
+        return output, hidden
     
     
     def init_hidden(self, batch_size):
@@ -511,8 +513,8 @@ def forward_back_prop(rnn, optimizer, criterion, inp, target, hidden):
     loss = criterion(output, target)
     loss.backward()
     
-    # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
-    nn.utils.clip_grad_norm_(rnn.parameters(), clip)
+    # clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
+    #nn.utils.clip_grad_norm_(rnn.parameters(), clip)
     optimizer.step()
     
     # return the loss over a batch and the hidden state produced by our model
@@ -595,9 +597,9 @@ def train_rnn(rnn, batch_size, optimizer, criterion, n_epochs, show_every_n_batc
 
 # Data params
 # Sequence Length
-sequence_length = 200  # of words in a sequence
+sequence_length = 10  # of words in a sequence
 # Batch Size
-batch_size = 128
+batch_size = 256
 
 # data loader - do not change
 train_loader = batch_data(int_text, sequence_length, batch_size)
@@ -625,7 +627,7 @@ hidden_dim = 256
 n_layers = 2
 
 # Show stats for every n number of batches
-show_every_n_batches = 500
+show_every_n_batches = 100
 
 print(len(vocab_to_int))
 
